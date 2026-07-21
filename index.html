@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Arbeitsanweisung V10</title>
+<style>
+body{font-family:Arial,sans-serif;margin:10px;background:#f4f4f4}
+.container{max-width:1300px;margin:auto;background:#fff;padding:15px}
+.header{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+input,textarea{width:100%;box-sizing:border-box;padding:10px;font-size:16px}
+textarea{min-height:180px;resize:vertical}
+.step{border:1px solid #ccc;padding:15px;margin-top:15px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.textCol{padding-right:15px;border-right:3px solid #666}
+.imageCol{padding-left:15px}
+.gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px}
+.gallery img{width:100%;border:1px solid #ccc}
+button{padding:12px 16px;font-size:16px;margin:4px}
+.printText{display:none;white-space:pre-wrap}
+@media(max-width:768px){.header{grid-template-columns:1fr 1fr}.grid{grid-template-columns:1fr}.textCol{border-right:none;border-bottom:3px solid #666;padding-right:0;padding-bottom:10px}.imageCol{padding-left:0;padding-top:10px}}
+@media print{.controls,.deleteBtn,.imgBtn,.fileInput,textarea{display:none!important}.printText{display:block!important}.grid{grid-template-columns:1fr 1fr!important}.textCol{border-right:3px solid #666!important;border-bottom:none!important}.imageCol{padding-left:15px!important}}
+</style>
+</head>
+<body>
+<div class='container'>
+<h1>Arbeitsanweisung</h1>
+<div class='header'>
+<div><label>Ersteller</label><input></div>
+<div><label>Anlage</label><input></div>
+<div><label>Artikel</label><input></div>
+<div><label>Datum</label><input type='date'></div>
+</div>
+<div class='controls'>
+<button id='addBtn' type='button'>Schritt hinzufügen</button>
+<button type='button' onclick='preparePrint();window.print();'>PDF Export</button>
+</div>
+<div id='steps'></div>
+</div>
+<script>
+const steps=document.getElementById('steps');
+function renumber(){document.querySelectorAll('.title').forEach((e,i)=>e.textContent='Schritt '+(i+1));}
+function preparePrint(){document.querySelectorAll('.step').forEach(s=>{s.querySelector('.printText').textContent=s.querySelector('textarea').value;});}
+function addStep(){
+const step=document.createElement('div');step.className='step';
+step.innerHTML=`<div style="display:flex;justify-content:space-between;align-items:center"><h3 class="title"></h3><button type="button" class="deleteBtn">Löschen</button></div><div class="grid"><div class="textCol"><textarea placeholder="Beschreibung des Arbeitsschrittes..."></textarea><div class="printText"></div></div><div class="imageCol"><button type="button" class="imgBtn">Bild hinzufügen</button><input class="fileInput" type="file" accept="image/*" capture="environment" multiple style="display:none"><div class="gallery"></div></div></div>`;
+steps.appendChild(step);
+step.querySelector('.deleteBtn').addEventListener('click',()=>{step.remove();renumber();});
+const fileInput=step.querySelector('.fileInput');
+step.querySelector('.imgBtn').addEventListener('click',()=>fileInput.click());
+fileInput.addEventListener('change',function(){Array.from(this.files).forEach(f=>{const r=new FileReader();r.onload=e=>{const img=document.createElement('img');img.src=e.target.result;step.querySelector('.gallery').appendChild(img);};r.readAsDataURL(f);});});
+renumber();
+}
+
+document.getElementById('addBtn').addEventListener('click',addStep,false);
+window.addEventListener('load',function(){if(steps.children.length===0)addStep();});
+</script>
+</body>
+</html>
